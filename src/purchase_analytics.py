@@ -1,21 +1,27 @@
 import csv
 from functools import partial
+import argparse
 
 products = "d:/Users/tomas/Downloads/instacart_online_grocery_shopping_2017_05_01/products.csv"
 orders = "d:/Users/tomas/Downloads/instacart_online_grocery_shopping_2017_05_01/order_products__train.csv"
 
 
 def open_inputfile(filename, func):
+    """
+
+    :param filename: The path of the csv file to open.
+    :param func: Use partial on a function to process the parsed csv row.
+    :return: Nones
+    """
     with open(filename, encoding="utf8") as fh:
         sample = fh.read(1024)
-        # dialect = csv.Sniffer().sniff(sample)
         header = csv.Sniffer().has_header(sample)
         fh.seek(0)
 
         # Assume csv uses 'excel' dialect.
         reader = csv.reader(fh, dialect='excel', quoting=csv.QUOTE_ALL)
 
-        # Skip first row if header exists, .
+        # Skip first row if header exists.
         if header:
             next(reader)
 
@@ -34,6 +40,12 @@ def open_inputfile(filename, func):
 
 
 def get_product_dept_id(row, callback=None):
+    """
+    Read product.csv to get a dict of (product_id, department_id).
+    :param row: A parsed row.
+    :param callback: Provide a callback dict to store values.
+    :return: None
+    """
     try:
         prod_id, dept_id = int(row[0]), int(row[3])
         callback[prod_id] = dept_id
@@ -43,6 +55,13 @@ def get_product_dept_id(row, callback=None):
 
 
 def get_orders_by_dept(row, ref_dict=None, callback=None):
+    """
+    Read orders.csv to aggregate product orders by department.
+    :param row: A parsed row.
+    :param ref_dict: A dict of (product_id, department_id).
+    :param callback: Provide a callback dict to store values.
+    :return: None
+    """
     try:
         prod_id, reordered = int(row[1]), int(row[3])
         dept_id = ref_dict[prod_id]
@@ -58,6 +77,13 @@ def get_orders_by_dept(row, ref_dict=None, callback=None):
 
 
 def summarize_orders_by_dept(input_products=None, input_orders=None, output_filename=None):
+    """
+    Summarize product orders by department.
+    :param input_products: path to 'products' csv file to read.
+    :param input_orders: path to 'orders' csv file to read.
+    :param output_filename: path and/or filename of the output written out in csv.s
+    :return: None
+    """
     # Callback.
     dict_products_dept = {}
     # Get products' dept ID.
@@ -96,3 +122,42 @@ def summarize_orders_by_dept(input_products=None, input_orders=None, output_file
                 print('file {}, line {}: {}'.format(filename, reader.line_num, e))
 
     return dict_output
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     help="Link files by hard or symbolic link.",
+                                     description=desc, epilog=epilog)
+
+    desc = """\
+        Link files by hard or symbolic link.
+        """
+
+    epilog = """\
+        Basic Usage
+        -----------
+        Provide source path to product.csv and order_products.csv.
+        Example: pipeline_link.py <sourcefile> <target path>
+
+        [Optional] Use symbolic link instead of hard link.
+        Example: pipeline_link.py -s <sourcepath> <target path>
+        >   pipeline_link.py -s /path/file.txt /target_path
+
+        """
+
+    parser.add_argument("product_file", help="Path to product.csv file.")
+    parser.add_argument("orders_file", help="Path to order_products.csv file.")
+    parser.add_argument("-o", "--output", help="Output filename. Default: report.csv", default="report.csv")
+
+    # Parse arguments.
+    args = parser.parse_args()
+
+    if args.product_file is not None and args.orders_file is not None:
+        summarize_orders_by_dept(args.product_file, args.orders_file, args.output)
+    else:
+        parser.print_usage()
+
+    pass
+
+
+if __name__ == '__main__':
+    main()
