@@ -1,0 +1,3 @@
+04/03/2019 01:41:48 AM: INFO: Opening ../input/products.csv
+04/03/2019 01:41:48 AM: INFO: Processed 49688 rows.
+04/03/2019 01:41:48 AM: CRITICAL: File ../input/order_products__train.csv1 not found!
