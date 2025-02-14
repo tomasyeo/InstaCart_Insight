@@ -1,6 +1,5 @@
 # InstaCart_Insight
 ###### Coder: Tomas Yeo
-###### Email: tomas.yeo@outlook.com
 ###### github: https://github.com/tomasyeo/InstaCart_Insight
 ###### Purpose: Coding challenge for Insight data engineering fellowship program
 ###### Submission date: 3 Apr 2019
